@@ -97,6 +97,9 @@ public class Demo {
 
         // We can allocate native arrays using constructors taking an integer as argument.
         Point hatPoints = new Point(3);
+        
+        // Nose Detection
+        Point nosePoints = new Point(1);
 
         while (frame.isVisible() && (grabbedImage = converter.convert(grabber.grab())) != null) {
             // Let's try to detect some faces! but we need a grayscale image...
@@ -114,8 +117,12 @@ public class Demo {
                 hatPoints.position(1).x(x + w * 11 / 10).y(y - h / 10);
                 hatPoints.position(2).x(x + w / 2      ).y(y - h / 2 );
                 fillConvexPoly(grabbedImage, hatPoints.position(0), 3, Scalar.GREEN, CV_AA, 0);
+                
+                // Nose Detection
+                nosePoints.position(0).x(x+w/2).y(y+h/2);
+                circle(grabbedImage, nosePoints.position(0), (w/10)+5, Scalar.RED, -1, 8, 0);
             }
-
+            
             // Let's find some contours! but first some thresholding...
             threshold(grayImage, grayImage, 64, 255, CV_THRESH_BINARY);
 
