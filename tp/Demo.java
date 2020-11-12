@@ -7,7 +7,7 @@ package tp;
 
 /**
  *
- * @author matte
+ * @author matte giancoli colonna rosich
  */
 import java.io.File;
 import java.net.URL;
@@ -15,13 +15,11 @@ import org.bytedeco.javacv.*;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.javacpp.indexer.*;
 import org.bytedeco.opencv.opencv_core.*;
-import org.bytedeco.opencv.opencv_imgproc.*;
-import org.bytedeco.opencv.opencv_calib3d.*;
 import org.bytedeco.opencv.opencv_objdetect.*;
 import static org.bytedeco.opencv.global.opencv_core.*;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
 import static org.bytedeco.opencv.global.opencv_calib3d.*;
-import static org.bytedeco.opencv.global.opencv_objdetect.*;
+import java.awt.Robot;
 
 public class Demo {
     public static void main(String[] args) throws Exception {
@@ -67,12 +65,6 @@ public class Demo {
         // by the garbage collector, but may still be explicitly released by calling deallocate().
         // You shall NOT call cvReleaseImage(), cvReleaseMemStorage(), etc. on objects allocated this way.
         Mat grayImage = new Mat(height, width, CV_8UC1);
-        Mat rotatedImage = grabbedImage.clone();
-
-        // The OpenCVFrameRecorder class simply uses the VideoWriter of opencv_videoio,
-        // but FFmpegFrameRecorder also exists as a more versatile alternative.
-        FrameRecorder recorder = FrameRecorder.createDefault("output.avi", width, height);
-        recorder.start();
 
         // CanvasFrame is a JFrame containing a Canvas component, which is hardware accelerated.
         // It can also switch into full-screen mode when called with a screenNumber.
@@ -100,7 +92,10 @@ public class Demo {
         
         // Nose Detection
         Point nosePoints = new Point(1);
-
+        
+        // Move the mouse
+        Robot myRobot = new Robot();
+   
         while (frame.isVisible() && (grabbedImage = converter.convert(grabber.grab())) != null) {
             // Let's try to detect some faces! but we need a grayscale image...
             cvtColor(grabbedImage, grayImage, CV_BGR2GRAY);
@@ -121,6 +116,7 @@ public class Demo {
                 // Nose Detection
                 nosePoints.position(0).x(x+w/2).y(y+h/2);
                 circle(grabbedImage, nosePoints.position(0), (w/10)+5, Scalar.RED, -1, 8, 0);
+                myRobot.mouseMove(x+w/2, y+h/2);
             }
             
             // Let's find some contours! but first some thresholding...
@@ -136,15 +132,11 @@ public class Demo {
                 approxPolyDP(contour, points, arcLength(contour, true) * 0.02, true);
                 drawContours(grabbedImage, new MatVector(points), -1, Scalar.BLUE);
             }
-
-            warpPerspective(grabbedImage, rotatedImage, randomR, rotatedImage.size());
-
-            Frame rotatedFrame = converter.convert(rotatedImage);
-            frame.showImage(rotatedFrame);
-            recorder.record(rotatedFrame);
+            
+            Frame grabbedFrame = converter.convert(grabbedImage);
+            frame.showImage(grabbedFrame);
         }
         frame.dispose();
-        recorder.stop();
         grabber.stop();
     }
 }
